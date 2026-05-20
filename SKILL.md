@@ -55,26 +55,29 @@ version: 2.0.0
 
 ### 模式一：.docx 模板文件解析
 
-#### Step 1: 读取文件
+#### Step 1: 运行格式提取脚本
 
-使用 python-docx 读取模板：
+使用技能自带的 `scripts/extract_format.py` 自动提取：
 
 ```bash
+# 安装依赖
 pip install python-docx -q
-python3 -c "
-from docx import Document
-doc = Document('用户提供的文件路径')
-print(f'段落数: {len(doc.paragraphs)}')
-print(f'样式数: {len(doc.styles)}')
-style = doc.styles['Normal']
-print(f'默认字体: {style.font.name}, 字号: {style.font.size}')
-print(f'行间距: {style.paragraph_format.line_spacing}')
-# 提取所有标题样式
-for s in doc.styles:
-    if 'Heading' in s.name or '标题' in s.name:
-        print(f'{s.name}: 字体={s.font.name}, 字号={s.font.size}')
-"
+
+# 提取格式规范（JSON 输出）
+python scripts/extract_format.py 用户上传的模板.docx
+
+# 或输出 Markdown 表格（更直观）
+python scripts/extract_format.py 用户上传的模板.docx --markdown
+
+# 保存到文件
+python scripts/extract_format.py 用户上传的模板.docx -o thesis-spec.json
 ```
+
+脚本会自动提取：纸张大小、页边距、正文/标题字体字号、行间距、首行缩进、段前段后间距等。输出完整 JSON 结构，包含：
+- `页面设置`：纸张、页边距、页眉页脚距离
+- `正文样式`：中文字体、西文字体、字号、行间距
+- `标题样式`：一级/二级/三级标题的字体字号加粗对齐
+- `样式使用统计`：模板中各类样式的使用频次
 
 #### Step 2: 提取 12 项核心格式指标
 
@@ -742,7 +745,27 @@ for s in doc.styles:
 [3] 张明, 李华. 基于深度学习的文本分类方法综述[J]. 计算机学报, 2021, 44(6): 1125-1149.
 ```
 
-**自动格式化**：用户提供DOI、标题或作者信息时，帮助按GB/T 7714格式化。可用 `WebSearch` 查找缺失的卷/期/页码。
+**自动格式化**：
+
+使用技能自带的 `scripts/gb7714_formatter.py`：
+
+```bash
+# 交互模式：逐项输入文献信息
+python scripts/gb7714_formatter.py
+
+# 显示所有文献类型的格式示例
+python scripts/gb7714_formatter.py --example
+
+# 从 JSON 文件批量格式化
+python scripts/gb7714_formatter.py --from-json refs.json
+
+# 输出到文件
+python scripts/gb7714_formatter.py --from-json refs.json -o 参考文献列表.txt
+```
+
+支持的文献类型：期刊论文[J]、专著[M]、学位论文[D]、会议论文[C]、专利[P]、标准[S]、电子文献[EB/OL]、报告[R]、报纸[N]
+
+用户提供DOI、标题或作者信息时，先用脚本尝试格式化，再用 `WebSearch` 查找缺失的卷/期/页码信息补全。
 
 ---
 
