@@ -1286,19 +1286,52 @@ Zhang等人[6]认为____。相比之下，Li等人[7]则指出____。
 
 ### 10. 最大化利用脚本
 
+**格式提取**：
 ```bash
-# 如果有多套模板（比如学院模板 + 学校模板），分别解析后对比
+# 如果有多套模板（学院模板 + 学校模板），分别解析后对比
 python scripts/extract_format.py 学院模板.docx -o college.json
 python scripts/extract_format.py 学校模板.docx -o school.json
 # 对比两份JSON，找出学院特殊要求
+```
 
-# 批量格式化参考文献
-# 先把文献信息整理成JSON（每篇一个type+authors+title...）
+**参考文献格式化**：
+```bash
+# 批量格式化（先整理成JSON）
 python scripts/gb7714_formatter.py --from-json my_refs.json -o 参考文献列表.txt
 
-# 查看所有类型示例，确保选了正确的文献类型
+# 交互模式逐条添加
+python scripts/gb7714_formatter.py
+
+# 查看所有文献类型示例
 python scripts/gb7714_formatter.py --example
 ```
+
+**论文配图生成**：
+```bash
+# ① 先生成示例配置文件（6种图表类型），了解 JSON 格式
+python scripts/draw_diagram.py --examples --examples-dir ./my_diagrams
+
+# ② 修改 JSON 配置文件，填入你的实际数据
+
+# ③ 生成图表（6种类型）：
+python scripts/draw_diagram.py flowchart    my_diagrams/flowchart.json    -o fig_flowchart.png --dpi 300
+python scripts/draw_diagram.py architecture my_diagrams/architecture.json -o fig_arch.png --dpi 300
+python scripts/draw_diagram.py comparison   my_diagrams/comparison.json   -o fig_cmp.png --dpi 300
+python scripts/draw_diagram.py training_curve my_diagrams/training.json   -o fig_loss.png --dpi 300
+python scripts/draw_diagram.py ablation     my_diagrams/ablation.json     -o fig_ablation.png --dpi 300
+python scripts/draw_diagram.py table        my_diagrams/table.json        -o fig_table.png --dpi 300
+```
+
+**图表类型速查**：
+
+| 类型 | 用途 | 论文中的位置 |
+|------|------|-------------|
+| `flowchart` | 算法流程/系统流程 | 第4章 方法设计 |
+| `architecture` | 系统架构框图 | 第4章 系统设计 |
+| `comparison` | 对比柱状图（带误差棒） | 第5章 实验结果 |
+| `training_curve` | 训练曲线（loss/acc） | 第5章 实验过程 |
+| `ablation` | 消融实验（增量贡献） | 第5章 消融分析 |
+| `table` | 学术三线表 | 全文均可 |
 
 ### 11. 冷知识
 
